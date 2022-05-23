@@ -25,7 +25,21 @@ services:
       - LEMMY_HTTPS=true
     volumes:
       - ./volumes/lemmy-ui/extra_themes:/app/extra_themes
-    depends_on: 
+    depends_on:
+      - lemmy
+
+  lemmy-uit:
+    image: dessalines/lemmy-ui:0.16.2
+    ports:
+      - "127.0.0.1:{{ lemmy_uit_port }}:1234"
+    restart: always
+    environment:
+      - LEMMY_INTERNAL_HOST=lemmy:8536
+      - LEMMY_EXTERNAL_HOST={{ domain2 }}
+      - LEMMY_HTTPS=true
+    volumes:
+      - ./volumes/lemmy-uit/extra_themes:/app/extra_themes
+    depends_on:
       - lemmy
 
   postgres:
