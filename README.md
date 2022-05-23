@@ -1,6 +1,6 @@
 # Lemmy-Ansible
 
-This provides an easy way to install [Lemmy](https://github.com/LemmyNet/lemmy) on any server. It automatically sets up an nginx server, letsencrypt certificates, and email.
+This provides an easy way to install a dual front [Lemmy](https://github.com/LemmyNet/lemmy) on any server. It automatically sets up an nginx server, letsencrypt certificates, and email for both front ends.
 
 ## Requirements
 
