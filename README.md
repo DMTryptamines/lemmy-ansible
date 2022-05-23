@@ -17,7 +17,7 @@ Clone this repo:
 
 ```
 git clone https://github.com/DMTryptamines/lemmy-ansible-dual-frontend.git
-cd lemmy-ansible
+cd lemmy-ansible-dual-frontend
 ```
 
 Make a directory to hold your config: 
