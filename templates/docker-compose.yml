@@ -29,7 +29,7 @@ services:
       - lemmy
 
   lemmy-uit:
-    image: dessalines/lemmy-ui:0.16.2
+    image: {{ lemmy_docker_uit_image }}
     ports:
       - "127.0.0.1:{{ lemmy_uit_port }}:1234"
     restart: always
