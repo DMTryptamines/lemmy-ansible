@@ -36,6 +36,11 @@
     args:
       creates: '/etc/letsencrypt/live/{{domain}}/privkey.pem'
 
+  - name: request 2nd front initial letsencrypt certificate
+    command: certbot certonly --nginx --agree-tos --cert-name '{{ domain2 }}' -d '{{ domain2 }}' -m '{{ letsencrypt_contact_email }}'
+    args:
+      creates: '/etc/letsencrypt/live/{{domain2}}/privkey.pem'
+
   - name: create lemmy folder
     file:
       path: '{{item.path}}'
@@ -53,6 +58,7 @@
     - set_fact:
         lemmy_port: "{{ 32767 |random(start=1024) }}"
         lemmy_ui_port: "{{ 32767 |random(start=1024) }}"
+        lemmy_uit_port: "{{ 32767 |random(start=1024) }}"
         pictrs_port: "{{ 32767 |random(start=1024) }}"
 
     - name: add template files
@@ -67,9 +73,14 @@
         - src: 'templates/nginx.conf'
           dest: '/etc/nginx/sites-available/{{domain}}.conf'
           mode: '0644'
+        - src: 'templates/nginx2.conf'
+          dest: '/etc/nginx/sites-available/{{domain2}}.conf'
+          mode: '0644'
       vars:
         lemmy_docker_image: "dessalines/lemmy:{{ lemmy_version | default( lookup('file', 'VERSION') )}}"
         lemmy_docker_ui_image: "dessalines/lemmy-ui:{{ lemmy_ui_version | default(lemmy_version | default(lookup('file', 'VERSION')))}}"
+        lemmy_docker_uit_image: "dessalines/lemmy-ui:{{ lemmy_ui_version | default(lemmy_version | default(lookup('file', 'VERSION')))}}"
+
 
     - block:
       - name: gather stats on site enabled config
@@ -88,7 +99,25 @@
           src: '../sites-available/{{domain}}.conf'
           dest: "/etc/nginx/sites-enabled/{{domain}}.conf"
           state: link
-          
+
+    - block:
+      - name: gather stats on 2nd site enabled config
+        stat:
+          path: "/etc/nginx/sites-enabled/{{domain2}}.conf"
+        register: reg_enabled
+
+      - name: remove if regular file (legacy) instead of symlink for 2nd site
+        file:
+          path: "/etc/nginx/sites-enabled/{{domain2}}.conf"
+          state: absent
+        when: reg_enabled.stat.exists and reg_enabled.stat.isreg
+
+      - name: enable 2nd nginx site
+        file:
+          src: '../sites-available/{{domain2}}.conf'
+          dest: "/etc/nginx/sites-enabled/{{domain2}}.conf"
+          state: link
+
     - name: add the config.hjson
       template:
         src: 'inventory/host_vars/{{domain}}/config.hjson'
@@ -110,7 +139,7 @@
   #     cmd: find .                    # To list files under /opt directory
   #     chdir: /opt                    # changes to /opt directory
   #     register: shell_output
-  # - debug: var=shell_output     
+  # - debug: var=shell_output
 
   - name: start docker-compose
     docker_compose:
@@ -128,3 +157,10 @@
       name: certbot-renew-lemmy
       user: root
       job: "certbot certonly --nginx --cert-name '{{ domain }}' -d '{{ domain }}' --deploy-hook 'nginx -s reload'"
+
+  - name: certbot renewal cronjob2
+    cron:
+      special_time: daily
+      name: certbot-renew-lemmy2
+      user: root
+      job: "certbot certonly --nginx --cert-name '{{ domain2 }}' -d '{{ domain2 }}' --deploy-hook 'nginx -s reload'"
