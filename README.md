@@ -56,7 +56,7 @@ If the command above fails, you may need to comment out this line In the ansible
 - Check out the [Lemmy Releases Changelog](https://github.com/LemmyNet/lemmy/blob/main/RELEASES.md) to see if there are any config changes with the releases since your last. 
 - Run `ansible-playbook -i inventory/hosts lemmy.yml --become`
 
-## Migrating your existing install to use this deploy (NOT FOR DUAL FRONT)
+## Migrating your existing install to use this deploy 
 
 - [Follow this guide](https://join-lemmy.org/docs/en/administration/backup_and_restore.html) to backup your existing install.
 - Run `docker-compose stop` to stop lemmy.
