@@ -19,7 +19,6 @@ Clone this repo:
 
 ```
 git clone https://github.com/DMTryptamines/lemmy-ansible-dual-frontend-jaeger-prom.git
-cd lemmy-ansible-dual-frontend
 ```
 
 Make a directory to hold your config: 
