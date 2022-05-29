@@ -33,6 +33,7 @@
       - path: '{{lemmy_base_dir}}/{{domain}}'
       - path: '/etc/nginx/sites-enabled/{{domain}}.conf'
       - path: '/etc/nginx/sites-enabled/{{domain2}}.conf'
+      - path: '/etc/nginx/sites-enabled/{{domain3}}.conf'
 
   - name: remove certbot cronjob
     cron:
@@ -42,4 +43,9 @@
   - name: remove certbot cronjob2
     cron:
       name: certbot-renew-lemmy2
+      state: absent
+
+  - name: remove certbot cronjob3
+    cron:
+      name: certbot-renew-jaeger
       state: absent

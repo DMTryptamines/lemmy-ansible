@@ -1,3 +1,4 @@
+
 ---
 - hosts: all
 
@@ -31,15 +32,20 @@
         - 'certbot'
         - 'python3-certbot-nginx'
 
-  - name: request initial letsencrypt certificate
+  - name: request initial lemmy letsencrypt certificate
     command: certbot certonly --nginx --agree-tos --cert-name '{{ domain }}' -d '{{ domain }}' -m '{{ letsencrypt_contact_email }}'
     args:
       creates: '/etc/letsencrypt/live/{{domain}}/privkey.pem'
 
-  - name: request 2nd front initial letsencrypt certificate
+  - name: request 2nd lemmy front initial letsencrypt certificate
     command: certbot certonly --nginx --agree-tos --cert-name '{{ domain2 }}' -d '{{ domain2 }}' -m '{{ letsencrypt_contact_email }}'
     args:
       creates: '/etc/letsencrypt/live/{{domain2}}/privkey.pem'
+
+  - name: request jaeger initial letsencrypt certificate
+    command: certbot certonly --nginx --agree-tos --cert-name '{{ domain3 }}' -d '{{ domain3 }}' -m '{{ letsencrypt_contact_email }}'
+    args:
+      creates: '/etc/letsencrypt/live/{{domain3}}/privkey.pem'
 
   - name: create lemmy folder
     file:
@@ -76,11 +82,16 @@
         - src: 'templates/nginx2.conf'
           dest: '/etc/nginx/sites-available/{{domain2}}.conf'
           mode: '0644'
+        - src: 'templates/nginx3.conf'
+          dest: '/etc/nginx/sites-available/{{domain3}}.conf'
+          mode: '0644'
+        - src: 'templates/otel.yml'
+          dest: '{{lemmy_base_dir}}/{{domain}}/otel.yml'
+          mode: '0644'
       vars:
         lemmy_docker_image: "dessalines/lemmy:{{ lemmy_version | default( lookup('file', 'VERSION') )}}"
         lemmy_docker_ui_image: "dessalines/lemmy-ui:{{ lemmy_ui_version | default(lemmy_version | default(lookup('file', 'VERSION')))}}"
         lemmy_docker_uit_image: "dessalines/lemmy-ui:{{ lemmy_ui_version | default(lemmy_version | default(lookup('file', 'VERSION')))}}"
-
 
     - block:
       - name: gather stats on site enabled config
@@ -116,6 +127,24 @@
         file:
           src: '../sites-available/{{domain2}}.conf'
           dest: "/etc/nginx/sites-enabled/{{domain2}}.conf"
+          state: link
+
+    - block:
+      - name: gather stats on jaeger site enabled config
+        stat:
+          path: "/etc/nginx/sites-enabled/{{domain3}}.conf"
+        register: reg_enabled
+
+      - name: remove if regular file (legacy) instead of symlink for jaeger site
+        file:
+          path: "/etc/nginx/sites-enabled/{{domain3}}.conf"
+          state: absent
+        when: reg_enabled.stat.exists and reg_enabled.stat.isreg
+
+      - name: enable jaeger nginx site
+        file:
+          src: '../sites-available/{{domain3}}.conf'
+          dest: "/etc/nginx/sites-enabled/{{domain3}}.conf"
           state: link
 
     - name: add the config.hjson
@@ -164,3 +193,10 @@
       name: certbot-renew-lemmy2
       user: root
       job: "certbot certonly --nginx --cert-name '{{ domain2 }}' -d '{{ domain2 }}' --deploy-hook 'nginx -s reload'"
+
+  - name: certbot renewal cronjob3
+    cron:
+      special_time: daily
+      name: certbot-renew-jaeger
+      user: root
+      job: "certbot certonly --nginx --cert-name '{{ domain3 }}' -d '{{ domain3 }}' --deploy-hook 'nginx -s reload'"
