@@ -39,7 +39,7 @@ Copy the sample inventory hosts file:
 
 `cp examples/hosts inventory/hosts`
 
-**Mandatory you must edit the defaults in the inventory hosts file (inventory/hosts) as described in the file comments
+**Mandatory** you must edit the defaults in the inventory hosts file (inventory/hosts) as described in the file comments
 
 `nano inventory/hosts`
 
