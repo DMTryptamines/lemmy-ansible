@@ -29,7 +29,7 @@ Copy the sample configuration file:
 
 `cp examples/config.hjson inventory/host_vars/<your-domain>/config.hjson`
 
-Edit that file (inventory/host_vars/<your-domain>/config.hjson) and change the config to your liking. Note: **Do not edit anything inside the {{ }} braces.**You can install a fully functioning instance without changing anything.
+Edit config.hjson and change the config to your liking. Note: **Do not edit anything inside the {{ }} braces.**You can install a fully functioning instance without changing anything.
 
 `nano inventory/host_vars/<your-domain>/config.hjson`
 
