@@ -2,7 +2,8 @@
 
 (**Does not include Prometheus yet**)
 
-This provides an easy way to install a dual front [Lemmy](https://github.com/LemmyNet/lemmy) on any server along with a fully functioning Jaeger-all-in-one. It automatically sets up an nginx server, letsencrypt certificates, and email for both lemmy front ends and jaeger.
+This provides an easy way to install a dual front [Lemmy](https://github.com/LemmyNet/lemmy) on any server along with a fully functioning Jaeger-all-in-one. It automatically sets up an nginx server, letsencrypt certificates, and email for both lemmy front ends and jaeger. 
+
 
 ## Requirements
 
@@ -12,6 +13,7 @@ To run this ansible playbook, you need to:
 - Configure 3 DNS `A` Records to point at your jaeger and lemmy frontends.
 - Make sure you can ssh to it, with a sudo user: `ssh <your-user>@<your-domain>`
 - Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) on your **local** machine (do not install it on your destination server).
+- **Ensure a firewall is setup as jaeger will be accessible to anyone at the supplied URL**
 
 ## Install
 
@@ -29,7 +31,7 @@ Copy the sample configuration file:
 
 `cp examples/config.hjson inventory/host_vars/<your-domain>/config.hjson`
 
-Edit config.hjson and change the config to your liking. Note: **Do not edit anything inside the {{ }} braces.**You can install a fully functioning instance without changing anything.
+Edit config.hjson and change the config to your liking. Note: **Do not edit anything inside the {{ }} braces.** You can install a fully functioning instance without changing anything.
 
 `nano inventory/host_vars/<your-domain>/config.hjson`
 
