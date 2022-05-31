@@ -3,13 +3,14 @@
 # - `myuser@example.com`: replace with the destination you use to connect to your server via ssh
 # - `domain=example.com`: replace `example.com` with your lemmy domain
 # - `domain2=2ndfe.example.com`: replace `2ndfe.example.com` with your 2nd lemmy front end domain
+# - `domain3=jaeger.example.com`: replace `jaeger.example.com` with your jaeger domain
 # - `letsencrypt_contact_email=your@email.com` replace `your@email.com` with your email address,
 #                                              to get notifications if your ssl cert expires
 # - `lemmy_base_dir=/srv/lemmy`: the location on the server where lemmy can be installed, can be any folder
 #                                if you are upgrading from a previous version, set this to `/lemmy`
 # - `lemmy_version`: <Optional> The back end version.
 # - `lemmy_ui_version`: <Optional> overrides the front end version.
-myuser@example.com  domain=example.com domain2=2ndfe.example.com  letsencrypt_contact_email=your@email.com  lemmy_base_dir=/srv/lemmy
+myuser@example.com  domain=example.com domain2=2ndfe.example.com domain3=jaeger.example.com letsencrypt_contact_email=your@email.com  lemmy_base_dir=/srv/lemmy
 
 [all:vars]
 ansible_connection=ssh
