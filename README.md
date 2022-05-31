@@ -1,4 +1,4 @@
-# Lemmy-Ansible-Dual-Frontend-Jaeger-Prom
+# Lemmy-Ansible-Dual-Frontend-Jaeger-Prom (EXPERIMENTAL USE AT YOUR OWN RISK)
 
 (**Does not include Prometheus yet**)
 
