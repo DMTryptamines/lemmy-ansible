@@ -1,0 +1,171 @@
+{
+	email DMTryptamines@protonmail.com
+}
+
+front.tryp.digital {
+    header {
+	    # Only connect to this site via HTTPS for the two years
+    	Strict-Transport-Security max-age=63072000
+
+    	# Various content security headers
+    	Referrer-Policy same-origin
+    	X-Content-Type-Options nosniff
+    	X-Frame-Options DENY
+    	X-XSS-Protection "1; mode=block"
+    	# disable FLoC tracking
+    	Permissions-Policy interest-cohort=()
+    }
+
+    @encode_mime {
+    	header Content-Type text/css 
+    	header Content-Type application/javascript 
+    	header Content-Type image/svg+xml
+	}
+	encode @encode_mime gzip
+
+	request_body {
+    	max_size 8MB
+    }
+
+    @pictshare_regexp path_regexp pictshare_regexp \/pictshare\/(.*)
+    redir @pictshare_regexp /pictrs/image/{re.pictshare_regexp.1} permanent
+
+    @backendpath {
+    	path /api/*
+    	path /pictrs/*
+    	path /feeds/*
+    	path /nodeinfo/*
+    	path /.well-known/*
+    }
+    # @contenttype header_regexp Content-Type application\/(activity\+json|ld\+json; profile=\"https:\/\/www\.w3\.org\/ns\/activitystreams\")
+    @contenttype { 
+    	header Content-Type application/activity+json 
+    	header Content-Type "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+    }
+    @acceptheader {
+    	header Accept application/activity+json 
+    	header Accept "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+    }
+    @backendmethod method POST
+
+    reverse_proxy @acceptheader  lemmy:8536
+    reverse_proxy @backendmethod lemmy:8536
+    reverse_proxy @backendpath   lemmy:8536 {
+    	transport http {
+    	   versions 1.1
+    	}
+
+    	header_up Upgrade {http.request.header.upgrade}
+    	header_up Connection upgrade
+
+    	header_down -Transfer-Encoding
+
+    	header_up X-Real-Ip {http.request.remote.host}
+     }
+
+    reverse_proxy lemmy-ui:1234
+}
+
+front2.tryp.digital {
+    header {
+	    # Only connect to this site via HTTPS for the two years
+    	Strict-Transport-Security max-age=63072000
+
+    	# Various content security headers
+    	Referrer-Policy same-origin
+    	X-Content-Type-Options nosniff
+    	X-Frame-Options DENY
+    	X-XSS-Protection "1; mode=block"
+    	# disable FLoC tracking
+    	Permissions-Policy interest-cohort=()
+    }
+
+    @encode_mime {
+    	header Content-Type text/css 
+    	header Content-Type application/javascript 
+    	header Content-Type image/svg+xml
+	}
+	encode @encode_mime gzip
+
+	request_body {
+    	max_size 8MB
+    }
+
+    @pictshare_regexp path_regexp pictshare_regexp \/pictshare\/(.*)
+    redir @pictshare_regexp /pictrs/image/{re.pictshare_regexp.1} permanent
+
+    @backendpath {
+    	path /api/*
+    	path /pictrs/*
+    	path /feeds/*
+    	path /nodeinfo/*
+    	path /.well-known/*
+    }
+    # @contenttype header_regexp Content-Type application\/(activity\+json|ld\+json; profile=\"https:\/\/www\.w3\.org\/ns\/activitystreams\")
+    @contenttype { 
+    	header Content-Type application/activity+json 
+    	header Content-Type "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+    }
+    @acceptheader {
+    	header Accept application/activity+json 
+    	header Accept "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+    }
+    @backendmethod method POST
+
+    reverse_proxy @acceptheader  lemmy:8536
+    reverse_proxy @backendmethod lemmy:8536
+    reverse_proxy @backendpath   lemmy:8536 {
+    	transport http {
+    	   versions 1.1
+    	}
+
+    	header_up Upgrade {http.request.header.upgrade}
+    	header_up Connection upgrade
+
+    	header_down -Transfer-Encoding
+
+    	header_up X-Real-Ip {http.request.remote.host}
+     }
+
+    reverse_proxy lemmy-uit:1234
+}
+
+:16686 {
+    basicauth /* {
+        {{ADMIN_USER}} {{ADMIN_PASSWORD_HASH}}
+    }
+    reverse_proxy jaeger:16686
+}
+
+:9090 {
+    basicauth /* {
+        {{ADMIN_USER}} {{ADMIN_PASSWORD_HASH}}
+    }
+    reverse_proxy prometheus:9090
+}
+
+:9093 {
+    basicauth /* {
+        {{ADMIN_USER}} {{ADMIN_PASSWORD_HASH}}
+    }
+    reverse_proxy alertmanager:9093
+}
+
+:9091 {
+    basicauth /* {
+        {{ADMIN_USER}} {{ADMIN_PASSWORD_HASH}}
+    }
+    
+    reverse_proxy pushgateway:9091
+}
+
+:3000 {
+    reverse_proxy grafana:3000
+}
+
+:3100 {
+    basicauth /* {
+        {{ADMIN_USER}} {{ADMIN_PASSWORD_HASH}}
+    }
+    reverse_proxy loki:3100
+}

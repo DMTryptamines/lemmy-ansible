@@ -1,5 +1,13 @@
 version: '2'
 
+networks:
+  monitor-net:
+    driver: bridge
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+
 services:
   lemmy:
     image: {{ lemmy_docker_image }}
@@ -14,6 +22,10 @@ services:
       - postgres
       - pictrs
       - otel
+    networks:
+      - monitor-net
+#    labels:
+#      org.label-schema.group: "lemmy"
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
@@ -28,6 +40,10 @@ services:
       - ./volumes/lemmy-ui/extra_themes:/app/extra_themes
     depends_on:
       - lemmy
+    networks:
+      - monitor-net
+#    labels:
+#      org.label-schema.group: "lemmy"
 
   lemmy-uit:
     image: {{ lemmy_docker_uit_image }}
@@ -42,6 +58,10 @@ services:
       - ./volumes/lemmy-uit/extra_themes:/app/extra_themes
     depends_on:
       - lemmy
+    networks:
+      - monitor-net
+#    labels:
+#      org.label-schema.group: "lemmy"
 
   postgres:
     image: postgres:12-alpine
@@ -52,6 +72,10 @@ services:
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/data
     restart: always
+    networks:
+      - monitor-net
+#    labels:
+#      org.label-schema.group: "lemmy"
 
   pictrs:
     image: asonix/pictrs:0.3.1
@@ -66,12 +90,20 @@ services:
     mem_limit: 200m
     depends_on:
       - otel
+    networks:
+      - monitor-net
+#    labels:
+#      org.label-schema.group: "lemmy"
 
   postfix:
     image: mwader/postfix-relay
     environment:
       - POSTFIX_myhostname={{ domain }}
     restart: "always"
+    networks:
+      - monitor-net
+#    labels:
+#      org.label-schema.group: "lemmy"
 
   otel:
     image: otel/opentelemetry-collector:latest
@@ -83,6 +115,10 @@ services:
     restart: always
     depends_on:
       - jaeger
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
 
   jaeger:
     image: jaegertracing/all-in-one:1
@@ -91,3 +127,165 @@ services:
       # To view traces, visit http://localhost:16686
       - "16686:16686"
     restart: always
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  prometheus:
+    image: prom/prometheus:v2.36.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    expose:
+      - 9090
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    restart: unless-stopped
+    expose:
+      - 9093
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  nodeexporter:
+    image: prom/node-exporter:v1.3.1
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    expose:
+      - 9100
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.44.0
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    restart: unless-stopped
+    expose:
+      - 8080
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  grafana:
+    image: grafana/grafana:8.5.4
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER={{ADMIN_USER}}
+      - GF_SECURITY_ADMIN_PASSWORD={{ADMIN_PASSWORD}}
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_USERS_ALLOW_SIGN_UP=false
+#      - GF_SERVER_PROTOCOL=https
+#      - GF_SERVER_HTTP_ADDR=grafana.tryp.digital
+#      - GF_SERVER_ENABLE_GZIP=true
+    restart: unless-stopped
+    expose:
+      - 3000
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  pushgateway:
+    image: prom/pushgateway:v1.4.3
+    container_name: pushgateway
+    restart: unless-stopped
+    expose:
+      - 9091
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  caddy:
+    image: caddy:2.3.0
+    container_name: caddy
+    ports:
+      - "3000:3000"
+      - "3100:3100"
+      - "9090:9090"
+      - "9093:9093"
+      - "9091:9091"
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./caddy:/etc/caddy
+    environment:
+      - ADMIN_USER={{ADMIN_USER}}
+      - ADMIN_PASSWORD={{ADMIN_PASSWORD}}
+      - ADMIN_PASSWORD_HASH={{ADMIN_PASSWORD_HASH}}
+    restart: unless-stopped
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  loki:
+    image: grafana/loki:2.5.0
+    container_name: loki
+    restart: unless-stopped
+    expose:
+      - 3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
+
+  promtail:
+    image: grafana/promtail:2.5.0
+    container_name: promtail
+    restart: unless-stopped
+    volumes:
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitor-net
+    labels:
+      org.label-schema.group: "monitoring"
