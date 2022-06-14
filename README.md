@@ -1,9 +1,10 @@
-# Lemmy-Ansible-Dual-Frontend-Jaeger-Prom (EXPERIMENTAL USE AT YOUR OWN RISK)
+# Lemmy-Ansible-Dual-Frontend-Jaeger-Prom + Loki 
 
-(**Does not include Prometheus yet**)
+This provides an easy way to install a dual front [Lemmy](https://github.com/LemmyNet/lemmy) on any server along with an (almost) fully functioning monitoring stack. It automatically sets up an caddy, letsencrypt certificates, and email for both lemmy front ends. The monitoring stack consisting of prometheus for metrics, jaeger/otel for traces, loki for logging and Grafana for visualizations. 
 
-This provides an easy way to install a dual front [Lemmy](https://github.com/LemmyNet/lemmy) on any server along with a fully functioning Jaeger-all-in-one. It automatically sets up an nginx server, letsencrypt certificates, and email for both lemmy front ends and jaeger. 
+Caddy provides a reverse proxy and basic auth for monitoring services except grafana. Grafana comes with premade dashboards but only the ones from the orignal repo are working currently. Grafana comes integrated with prometheus but loki and jaeger integration is just as simple as entering the `jaeger:16686` and `loki:3100` along with the basic auth credentials.
 
+This repo is mostly a combination of https://github.com/LemmyNet/lemmy-ansible & https://github.com/stefanprodan/dockprom
 
 ## Requirements
 
@@ -13,7 +14,6 @@ To run this ansible playbook, you need to:
 - Configure 3 DNS `A` Records to point at your jaeger and lemmy frontends.
 - Make sure you can ssh to it, with a sudo user: `ssh <your-user>@<your-domain>`
 - Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) on your **local** machine (do not install it on your destination server).
-- **Ensure a firewall is setup as jaeger will be accessible to anyone at the supplied URL**
 
 ## Install
 
