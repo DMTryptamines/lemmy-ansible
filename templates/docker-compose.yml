@@ -24,8 +24,10 @@ services:
       - otel
     networks:
       - monitor-net
-#    labels:
-#      org.label-schema.group: "lemmy"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   lemmy-ui:
     image: {{ lemmy_docker_ui_image }}
@@ -42,8 +44,10 @@ services:
       - lemmy
     networks:
       - monitor-net
-#    labels:
-#      org.label-schema.group: "lemmy"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   lemmy-uit:
     image: {{ lemmy_docker_uit_image }}
@@ -60,8 +64,10 @@ services:
       - lemmy
     networks:
       - monitor-net
-#    labels:
-#      org.label-schema.group: "lemmy"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   postgres:
     image: postgres:12-alpine
@@ -74,8 +80,10 @@ services:
     restart: always
     networks:
       - monitor-net
-#    labels:
-#      org.label-schema.group: "lemmy"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   pictrs:
     image: asonix/pictrs:0.3.1
@@ -92,8 +100,10 @@ services:
       - otel
     networks:
       - monitor-net
-#    labels:
-#      org.label-schema.group: "lemmy"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   postfix:
     image: mwader/postfix-relay
@@ -102,8 +112,10 @@ services:
     restart: "always"
     networks:
       - monitor-net
-#    labels:
-#      org.label-schema.group: "lemmy"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   otel:
     image: otel/opentelemetry-collector:latest
@@ -131,6 +143,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   prometheus:
     image: prom/prometheus:v2.36.0
@@ -152,6 +168,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   alertmanager:
     image: prom/alertmanager:v0.24.0
@@ -168,6 +188,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   nodeexporter:
     image: prom/node-exporter:v1.3.1
@@ -188,6 +212,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.44.0
@@ -208,6 +236,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   grafana:
     image: grafana/grafana:8.5.4
@@ -231,6 +263,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   pushgateway:
     image: prom/pushgateway:v1.4.3
@@ -242,6 +278,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   caddy:
     image: caddy:2.3.0
@@ -265,6 +305,10 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://{{ADMIN_USER}}:{{ADMIN_PASSWORD}}@localhost:3100/loki/api/v1/push"
 
   loki:
     image: grafana/loki:2.5.0

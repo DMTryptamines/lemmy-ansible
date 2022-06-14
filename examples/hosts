@@ -10,7 +10,7 @@
 #                                if you are upgrading from a previous version, set this to `/lemmy`
 # - `lemmy_version`: <Optional> The back end version.
 # - `lemmy_ui_version`: <Optional> overrides the front end version.
-myuser@example.com  domain=example.com domain2=2ndfe.example.com domain3=jaeger.example.com letsencrypt_contact_email=your@email.com  lemmy_base_dir=/srv/lemmy
+myuser@example.com  domain=front.site.example domain2=front2.site.example domain3=jaeger.site.example letsencrypt_contact_email=your@email.com  lemmy_base_dir=/srv/lemmy ADMIN_USER=admin ADMIN_PASSWORD=admin ADMIN_PASSWORD_HASH=JDJhJDE0JE91S1FrN0Z0VEsyWmhrQVpON1VzdHVLSDkyWHdsN0xNbEZYdnNIZm1pb2d1blg4Y09mL0ZP
 
 [all:vars]
 ansible_connection=ssh
